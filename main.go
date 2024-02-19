@@ -22,7 +22,9 @@ func main() {
 	})
 
 	// Evaluate the chain
-	result, err := chain.Evaluate(10) // Starting input is 10
+	input_slice := []interface{}{1, 2, 3, 4}
+
+	result, err := chain.Evaluate(input_slice)
 	if err != nil {
 		fmt.Println("Error:", err)
 		return
@@ -30,8 +32,5 @@ func main() {
 	fmt.Println("Result:", result)
 }
 
-/*
-
-lazy evaluation
-
-*/
+// TODO:
+// add fuctions like count, filter, map and introduce lazy evaluatin to them
