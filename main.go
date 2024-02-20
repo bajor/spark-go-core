@@ -7,11 +7,19 @@ import (
 )
 
 func main() {
+	// Example usage
+
 	chain := &lazy.LazyChain{}
 
-	chain.Add(lazy.MapOperation(func(i interface{}) (interface{}, error) {
+	// Add operations to the chain
+	chain.Add(func(i interface{}) (interface{}, error) {
+		// Example operation: add 5
+		return i.(int) + 5, nil
+	})
+	chain.Add(func(i interface{}) (interface{}, error) {
+		// Another operation: multiply by 2
 		return i.(int) * 2, nil
-	}))
+	})
 
 	// Evaluate the chain
 	input_slice := []interface{}{1, 2, 3, 4}
@@ -26,4 +34,3 @@ func main() {
 
 // TODO:
 // add fuctions like count, filter, map and introduce lazy evaluatin to them
-// write function for string only - do some manipulations on the stirng
