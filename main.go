@@ -13,6 +13,13 @@ func main() {
 		return i.(int) * 2, nil
 	}))
 
+	chain.Add(lazy.FilterOperations(func(i interface{}) bool {
+		if val, ok := i.(int); ok {
+			return val > 4
+		}
+		return false
+	}))
+
 	// Evaluate the chain
 	input_slice := []interface{}{1, 2, 3, 4}
 

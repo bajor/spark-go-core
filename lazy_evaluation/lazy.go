@@ -6,7 +6,7 @@ import "fmt"
 
 type Operation interface{}
 
-type FilterOperations func(i interface{}) (interface{}, error)
+type FilterOperations func(i interface{}) bool
 
 type MapOperation func(i interface{}) (interface{}, error)
 
@@ -38,10 +38,8 @@ func (lc *LazyChain) Evaluate(inputs []interface{}) (interface{}, error) {
 
 	for i := 0; i < len(inputs); i++ {
 		for _, op := range lc.filterOps {
-			inputs[i], err = op(inputs[i])
-			// if not matching the cripteria - remove it from input list
-			if err != nil {
-				return nil, err // Early return on first error
+			if !op(inputs[i]) {
+				inputs = append(inputs[:i], inputs[i+1:]...)
 			}
 		}
 	}
@@ -64,12 +62,6 @@ func (lc *LazyChain) Evaluate(inputs []interface{}) (interface{}, error) {
 	}
 	return inputs, nil
 }
-
-// func EvaluateMap
-
-// func EvaluateReduce
-
-// func OptimizeOperationsOrder
 
 /*
 
