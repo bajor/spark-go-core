@@ -2,7 +2,9 @@
 
 package lazy
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type Operation interface{}
 
@@ -10,9 +12,8 @@ type FilterOperations func(i interface{}) bool
 
 type MapOperation func(i interface{}) (interface{}, error)
 
-type ReduceOperation func(i interface{}) (interface{}, error)
+type ReduceOperation func(a []interface{}) ([]interface{}, error)
 
-// LazyChain holds a slice of operations to be executed lazily
 type LazyChain struct {
 	filterOps []FilterOperations
 	mapOps    []MapOperation
@@ -32,7 +33,6 @@ func (lc *LazyChain) Add(op Operation) {
 	}
 }
 
-// Evaluate executes the chain of operations lazily
 func (lc *LazyChain) Evaluate(inputs []interface{}) (interface{}, error) {
 	var err error
 
@@ -48,18 +48,18 @@ func (lc *LazyChain) Evaluate(inputs []interface{}) (interface{}, error) {
 		for _, op := range lc.mapOps {
 			inputs[i], err = op(inputs[i])
 			if err != nil {
-				return nil, err // Early return on first error
+				return nil, err
 			}
 		}
-
-		for _, op := range lc.reduceOps {
-			inputs[i], err = op(inputs[i])
-			if err != nil {
-				return nil, err // Early return on first error
-			}
-		}
-
 	}
+
+	for _, op := range lc.reduceOps {
+		inputs, err = op(inputs)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	return inputs, nil
 }
 

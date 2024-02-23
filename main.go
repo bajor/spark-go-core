@@ -20,7 +20,10 @@ func main() {
 		return false
 	}))
 
-	// Evaluate the chain
+	chain.Add(lazy.ReduceOperation(func(a []interface{}) ([]interface{}, error) {
+		return []interface{}{len(a)}, nil
+	}))
+
 	input_slice := []interface{}{1, 2, 3, 4}
 
 	result, err := chain.Evaluate(input_slice)
@@ -32,5 +35,16 @@ func main() {
 }
 
 // TODO:
+// filter - any given filter
+// map - any lambda
+// reduce:
+// 		- reduce - take two arguments and return one - do it cumulatively onver entire array:
+//			implementations of reduce:
+//			- sum
+//			- dot product
+//			- count - add 1 for each element of array
+//			- max (iteratively max of each two), min
+//
+//
 // add fuctions like count, filter, map and introduce lazy evaluatin to them
 // write function for string only - do some manipulations on the stirng
