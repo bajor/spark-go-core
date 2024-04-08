@@ -28,23 +28,97 @@ func main() {
 
 	result, err := chain.Evaluate(input_slice)
 	if err != nil {
-		fmt.Println("Error:", err)
-		return
+		panic(err)
 	}
 	fmt.Println("Result:", result)
 }
 
-// TODO:
-// filter - any given filter
-// map - any lambda
-// reduce:
-// 		- reduce - take two arguments and return one - do it cumulatively onver entire array:
-//			implementations of reduce:
-//			- sum
-//			- dot product
-//			- count - add 1 for each element of array
-//			- max (iteratively max of each two), min
-//
-//
-// add fuctions like count, filter, map and introduce lazy evaluatin to them
-// write function for string only - do some manipulations on the stirng
+
+/*
+type RDD struct {
+	data []interface{}
+	chain *lazy.LazyChain
+}
+
+func NewRDD(data []interface{}) *RDD {
+	return &RDD{
+		data: data,
+		chain: &lazy.LazyChain{},
+	}
+}
+
+func (r *RDD) Map(f func(i interface{}) (interface{}, error)) *RDD {
+	r.chain.Add(lazy.MapOperation(f))
+	return r
+}
+
+func (r *RDD) Filter(f func(i interface{}) bool) *RDD {
+	r.chain.Add(lazy.FilterOperations(f))
+	return r
+}
+
+func (r *RDD) Reduce(f func(a []interface{}) ([]interface{}, error)) *RDD {
+	r.chain.Add(lazy.ReduceOperation(f))
+	return r
+}
+
+func (r *RDD) Count() (int, error) {
+	r.chain.Add(lazy.ReduceOperation(func(a []interface{}) ([]interface{}, error) {
+		return []interface{}{len(a)}, nil
+	}))
+	result, err := r.chain.Evaluate(r.data)
+	if err != nil {
+		return 0, err
+	}
+	return result[0].(int), nil
+}
+
+func (r *RDD) Sum() (int, error) {
+	r.chain.Add(lazy.ReduceOperation(func(a []interface{}) ([]interface{}, error) {
+		sum := 0
+		for _, v := range a {
+			sum += v.(int)
+		}
+		return []interface{}{sum}, nil
+	}))
+	result, err := r.chain.Evaluate(r.data)
+	if err != nil {
+		return 0, err
+	}
+	return result[0].(int), nil
+}
+
+func (r *RDD) Max() (int, error) {
+	r.chain.Add(lazy.ReduceOperation(func(a []interface{}) ([]interface{}, error) {
+		max := a[0].(int)
+		for _, v := range a {
+			if v.(int) > max {
+				max = v.(int)
+			}
+		}
+		return []interface{}{max}, nil
+	}))
+	result, err := r.chain.Evaluate(r.data)
+	if err != nil {
+		return 0, err
+	}
+	return result[0].(int), nil
+}
+
+func (r *RDD) Min() (int, error) {
+	r.chain.Add(lazy.ReduceOperation(func(a []interface{}) ([]interface{}, error) {
+		min := a[0].(int)
+		for _, v := range a {
+			if v.(int) < min {
+				min = v.(int)
+			}
+		}
+		return []interface{}{min}, nil
+	}))
+	result, err := r.chain.Evaluate(r.data)
+	if err != nil {
+		return 0, err
+	}
+	return result[0].(int), nil
+}
+*/
