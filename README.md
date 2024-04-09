@@ -48,3 +48,13 @@ func main() {
 ## RDDs
 
 TODO
+#### first iteration
+Any transformation on an RDD creates a new RDD
+
+Data Partitioning: Decide on a strategy for data partitioning across nodes. This could be based on data size or a key in the data itself (key-based partitioning).
+
+#### next iteraions 
+Distributed Computation: Use goroutines for concurrent execution of tasks. Channels can be used for communication between these tasks, especially for shuffling data during transformations like reduceByKey.
+
+Communication: Implement a networking layer to allow nodes to communicate. Go’s standard net package can be used for TCP/UDP communication.
+Serialization: Data sent over the network needs to be serialized. Go supports several serialization formats (JSON, Protobuf, etc.) that you can leverage for efficient data transfer.
