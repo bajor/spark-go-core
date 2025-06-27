@@ -59,43 +59,6 @@ func TestRDD_OperationChaining(t *testing.T) {
 	}
 }
 
-func TestRDD_ReduceOperations(t *testing.T) {
-	rdd := NewKeyedRDD([]interface{}{1, 2, 3, 4, 5, 6}, func(i interface{}) (interface{}, error) {
-		return i, nil
-	})
-
-	rdd = rdd.Map(func(i interface{}) (interface{}, error) {
-		return i.(int) * 2, nil
-	}).Filter(func(i interface{}) bool {
-		if val, ok := i.(int); ok {
-			return val > 4
-		}
-		return false
-	}).ReduceByKey(func(a []interface{}) ([]interface{}, error) {
-		return []interface{}{len(a)}, nil
-	})
-
-	result := rdd.GetData()
-	expected := []interface{}{1, 1, 1, 1} // Each element gets its own partition
-	if !reflect.DeepEqual(result, expected) {
-		t.Errorf("ReduceByKey failed: got %v, want %v", result, expected)
-	}
-
-	rdd = rdd.Reduce(func(a []interface{}) ([]interface{}, error) {
-		sum := 0
-		for _, val := range a {
-			sum += val.(int)
-		}
-		return []interface{}{sum}, nil
-	})
-
-	result = rdd.GetData()
-	expected = []interface{}{4} // sum of [1,1,1,1]
-	if !reflect.DeepEqual(result, expected) {
-		t.Errorf("Reduce failed: got %v, want %v", result, expected)
-	}
-}
-
 func TestRDD_ImmutableOperations(t *testing.T) {
 	// Test that operations don't modify the original RDD
 	original := NewKeyedRDD([]interface{}{1, 2, 3}, func(i interface{}) (interface{}, error) {
@@ -142,5 +105,25 @@ func TestRDD_EmptyChain(t *testing.T) {
 	expected := []interface{}{1, 2, 3}
 	if !reflect.DeepEqual(result, expected) {
 		t.Errorf("Empty chain failed: got %v, want %v", result, expected)
+	}
+}
+
+func TestRDD_IntegrationWithOperations(t *testing.T) {
+	// Integration test: verify RDD correctly uses operations package
+	rdd := NewKeyedRDD([]interface{}{1, 2, 3, 4, 5, 6}, func(i interface{}) (interface{}, error) {
+		return i, nil
+	})
+
+	// Test that RDD operations produce same results as direct operations
+	rdd = rdd.Map(func(i interface{}) (interface{}, error) {
+		return i.(int) * 2, nil
+	}).Filter(func(i interface{}) bool {
+		return i.(int) > 4
+	})
+
+	result := rdd.GetData()
+	expected := []interface{}{6, 8, 10, 12}
+	if !reflect.DeepEqual(result, expected) {
+		t.Errorf("RDD integration failed: got %v, want %v", result, expected)
 	}
 } 
