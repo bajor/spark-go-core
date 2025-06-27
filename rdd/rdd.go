@@ -1,56 +1,6 @@
 package rdd
 
-import (
-	"github.com/bajor/spark-go-core/operations"
-)
-
-type KeyedRDD struct {
-	data  []interface{}
-	chain *OperationChain
-	key   func(i interface{}) (interface{}, error)
-}
-
-type OperationChain struct {
-	operations []Operation
-}
-
-type Operation interface {
-	Execute(data []interface{}) ([]interface{}, error)
-}
-
-type MapOperation struct {
-	f func(interface{}) (interface{}, error)
-}
-
-func (m MapOperation) Execute(data []interface{}) ([]interface{}, error) {
-	return operations.Map(data, m.f)
-}
-
-type FilterOperation struct {
-	f func(interface{}) bool
-}
-
-func (f FilterOperation) Execute(data []interface{}) ([]interface{}, error) {
-	return operations.Filter(data, f.f), nil
-}
-
-type ReduceOperation struct {
-	f func([]interface{}) ([]interface{}, error)
-}
-
-func (r ReduceOperation) Execute(data []interface{}) ([]interface{}, error) {
-	return operations.Reduce(data, r.f)
-}
-
-type ReduceByKeyOperation struct {
-	keyFunc func(interface{}) (interface{}, error)
-	reduceFunc func([]interface{}) ([]interface{}, error)
-}
-
-func (r ReduceByKeyOperation) Execute(data []interface{}) ([]interface{}, error) {
-	return operations.ReduceByKey(data, r.keyFunc, r.reduceFunc)
-}
-
+// NewKeyedRDD creates a new KeyedRDD with the given data and key function
 func NewKeyedRDD(data []interface{}, key func(i interface{}) (interface{}, error)) *KeyedRDD {
 	return &KeyedRDD{
 		data:  data,
@@ -59,6 +9,7 @@ func NewKeyedRDD(data []interface{}, key func(i interface{}) (interface{}, error
 	}
 }
 
+// Map applies a transformation function to each element
 func (r *KeyedRDD) Map(f func(i interface{}) (interface{}, error)) *KeyedRDD {
 	newChain := &OperationChain{operations: make([]Operation, len(r.chain.operations))}
 	copy(newChain.operations, r.chain.operations)
@@ -71,6 +22,7 @@ func (r *KeyedRDD) Map(f func(i interface{}) (interface{}, error)) *KeyedRDD {
 	}
 }
 
+// Filter keeps only elements that match the predicate
 func (r *KeyedRDD) Filter(f func(i interface{}) bool) *KeyedRDD {
 	newChain := &OperationChain{operations: make([]Operation, len(r.chain.operations))}
 	copy(newChain.operations, r.chain.operations)
@@ -83,11 +35,12 @@ func (r *KeyedRDD) Filter(f func(i interface{}) bool) *KeyedRDD {
 	}
 }
 
+// ReduceByKey groups elements by key and applies a reduce function to each group
 func (r *KeyedRDD) ReduceByKey(f func(a []interface{}) ([]interface{}, error)) *KeyedRDD {
 	newChain := &OperationChain{operations: make([]Operation, len(r.chain.operations))}
 	copy(newChain.operations, r.chain.operations)
 	newChain.operations = append(newChain.operations, ReduceByKeyOperation{
-		keyFunc: r.key,
+		keyFunc:    r.key,
 		reduceFunc: f,
 	})
 	
@@ -98,6 +51,7 @@ func (r *KeyedRDD) ReduceByKey(f func(a []interface{}) ([]interface{}, error)) *
 	}
 }
 
+// Reduce applies a function to combine all elements into a single result
 func (r *KeyedRDD) Reduce(f func(a []interface{}) ([]interface{}, error)) *KeyedRDD {
 	newChain := &OperationChain{operations: make([]Operation, len(r.chain.operations))}
 	copy(newChain.operations, r.chain.operations)
@@ -110,6 +64,7 @@ func (r *KeyedRDD) Reduce(f func(a []interface{}) ([]interface{}, error)) *Keyed
 	}
 }
 
+// GetData evaluates the lazy operation chain and returns the result
 func (r *KeyedRDD) GetData() []interface{} {
 	if len(r.chain.operations) == 0 {
 		return r.data
