@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	RDD "github.com/bajor/spark-go-core/resiliant_distributed_dataset"
+	RDD "github.com/bajor/spark-go-core/rdd"
 )
 
 func main() {
