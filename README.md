@@ -44,14 +44,50 @@ mapped.GetData()   // [2 4 6]
 filtered.GetData() // [2 3]
 ```
 
-TODO
-#### first iteration
-Any transformation on an RDD creates a new RDD
+## TODO
 
-Data Partitioning: Decide on a strategy for data partitioning across nodes. This could be based on data size or a key in the data itself (key-based partitioning).
+### Simple Distributed POC Implementation
 
-#### next iteraions 
-Distributed Computation: Use goroutines for concurrent execution of tasks. Channels can be used for communication between these tasks, especially for shuffling data during transformations like reduceByKey.
+#### Phase 1: Basic Node Emulation
+- [ ] **Simple Driver Node**
+  - TCP server listening for worker connections
+  - Basic RDD operation distribution
+  - Simple worker registration (in-memory list)
+- [ ] **Simple Worker Nodes**
+  - TCP client connecting to driver
+  - Basic task execution (map/filter operations)
+  - Return results to driver
+- [ ] **Basic Communication**
+  - Simple JSON messages over TCP
+  - Basic request/response pattern
+  - No complex error handling
 
-Communication: Implement a networking layer to allow nodes to communicate. Go's standard net package can be used for TCP/UDP communication.
-Serialization: Data sent over the network needs to be serialized. Go supports several serialization formats (JSON, Protobuf, etc.) that you can leverage for efficient data transfer.
+#### Phase 2: RDD Partitioning
+- [ ] **Simple Data Partitioning**
+  - Split RDD data across available workers
+  - Round-robin or hash-based distribution
+  - Basic partition metadata tracking
+- [ ] **Distributed RDD Operations**
+  - Send map/filter operations to workers
+  - Collect results from all workers
+  - Simple result aggregation
+
+#### Phase 3: Proof of Concept
+- [ ] **Basic Task Distribution**
+  - Driver splits RDD into partitions
+  - Send partitions + operations to workers
+  - Collect and combine results
+- [ ] **Simple Execution**
+  - One operation at a time (no complex chaining)
+  - Basic result collection
+  - Simple error handling (panic on failure)
+
+#### Phase 4: Demo Setup
+- [ ] **Manual Node Startup**
+  - Start driver with configurable port
+  - Start multiple worker processes manually
+  - Simple configuration via command line flags
+- [ ] **Basic Demo**
+  - Simple map/filter operations across nodes
+  - Show data partitioning and result collection
+  - Basic logging to prove distribution works
