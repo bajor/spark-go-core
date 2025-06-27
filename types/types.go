@@ -1,15 +1,15 @@
-package rdd
+package types
 
 // KeyedRDD represents a Resilient Distributed Dataset with key-based operations
 type KeyedRDD struct {
-	data  []interface{}
-	chain *OperationChain
-	key   func(i interface{}) (interface{}, error)
+	Data  []interface{}
+	Chain *OperationChain
+	Key   func(i interface{}) (interface{}, error)
 }
 
 // OperationChain holds a sequence of operations to be executed lazily
 type OperationChain struct {
-	operations []Operation
+	Operations []Operation
 }
 
 // Operation interface defines the contract for all RDD operations
