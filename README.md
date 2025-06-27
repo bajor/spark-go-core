@@ -7,6 +7,15 @@ The implementation includes chaining of map, filter, and reduce operations. Ther
 - Then mapping operations are applied.
 - Finally, the data is reduced.
 
+### Filter Behavior
+The filter operation works as follows:
+- If an element matches the filter condition, it is left as is
+- If an element doesn't match the filter condition, it is converted in-place to `nil`
+- All other operations (map, reduce) skip `nil` elements
+- In the final evaluation, all `nil` elements are removed before returning the result
+
+This approach allows for efficient lazy evaluation where filter operations don't immediately remove elements but mark them for later removal.
+
 **Code example:**
 ```go
 package main
@@ -47,6 +56,49 @@ func main() {
 
 ## RDDs
 
+The RDD (Resilient Distributed Dataset) implementation provides a high-level API for data processing with lazy evaluation.
+
+**Code example:**
+```go
+package main
+
+import (
+	"fmt"
+
+	RDD "github.com/bajor/spark-go-core/resiliant_distributed_dataset"
+)
+
+func main() {
+	// Create a new RDD with data [1, 2, 3, 4, 5, 6]
+	rdd := RDD.NewKeyedRDD([]interface{}{1, 2, 3, 4, 5, 6}, func(i interface{}) (interface{}, error) {
+		return i, nil
+	})
+
+	// Map: multiply each element by 2
+	rdd = rdd.Map(func(i interface{}) (interface{}, error) {
+		return i.(int) * 2, nil
+	})
+
+	// Filter: keep only elements > 4
+	rdd = rdd.Filter(func(i interface{}) bool {
+		if val, ok := i.(int); ok {
+			return val > 4
+		}
+		return false
+	})
+
+	// Get the result: [10, 12] (only 10 and 12 are > 4)
+	fmt.Println("After filter:", rdd.GetData())
+
+	// Reduce: count elements
+	rdd = rdd.ReduceByKey(func(a []interface{}) ([]interface{}, error) {
+		return []interface{}{len(a)}, nil
+	})
+
+	fmt.Println("Count:", rdd.GetData())
+}
+```
+
 TODO
 #### first iteration
 Any transformation on an RDD creates a new RDD
@@ -56,5 +108,5 @@ Data Partitioning: Decide on a strategy for data partitioning across nodes. This
 #### next iteraions 
 Distributed Computation: Use goroutines for concurrent execution of tasks. Channels can be used for communication between these tasks, especially for shuffling data during transformations like reduceByKey.
 
-Communication: Implement a networking layer to allow nodes to communicate. Go’s standard net package can be used for TCP/UDP communication.
+Communication: Implement a networking layer to allow nodes to communicate. Go's standard net package can be used for TCP/UDP communication.
 Serialization: Data sent over the network needs to be serialized. Go supports several serialization formats (JSON, Protobuf, etc.) that you can leverage for efficient data transfer.

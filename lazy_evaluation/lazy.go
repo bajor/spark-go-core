@@ -33,18 +33,28 @@ func (lc *LazyChain) Add(op Operation) {
 	}
 }
 
+func (lc *LazyChain) HasOperations() bool {
+	return len(lc.filterOps) > 0 || len(lc.mapOps) > 0 || len(lc.reduceOps) > 0
+}
+
 func (lc *LazyChain) Evaluate(inputs []interface{}) (interface{}, error) {
 	var err error
 
+	// Apply filter operations - convert non-matching elements to nil
 	for i := 0; i < len(inputs); i++ {
 		for _, op := range lc.filterOps {
 			if !op(inputs[i]) {
-				inputs = append(inputs[:i], inputs[i+1:]...)
+				inputs[i] = nil
+				break // Once an element is set to nil, no need to check other filter ops
 			}
 		}
 	}
 
+	// Apply map operations - skip nil elements
 	for i := 0; i < len(inputs); i++ {
+		if inputs[i] == nil {
+			continue // Skip nil elements
+		}
 		for _, op := range lc.mapOps {
 			inputs[i], err = op(inputs[i])
 			if err != nil {
@@ -53,14 +63,23 @@ func (lc *LazyChain) Evaluate(inputs []interface{}) (interface{}, error) {
 		}
 	}
 
+	// Remove nil elements before reduce operations
+	filteredInputs := make([]interface{}, 0, len(inputs))
+	for _, input := range inputs {
+		if input != nil {
+			filteredInputs = append(filteredInputs, input)
+		}
+	}
+
+	// Apply reduce operations
 	for _, op := range lc.reduceOps {
-		inputs, err = op(inputs)
+		filteredInputs, err = op(filteredInputs)
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	return inputs, nil
+	return filteredInputs, nil
 }
 
 /*

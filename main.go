@@ -6,20 +6,6 @@ import (
 	RDD "github.com/bajor/spark-go-core/resiliant_distributed_dataset"
 )
 
-/*
-
-TODO FILTER, ITS BROKE
-
-it should work as follows:
-	- if you match condition - leave it as is 
-	- if you don't - convert it inplace to nil
-	- all other methods should skip element if it's nil
-	- in evaluate, reduce - nil should be removed
-
-add this to readme 
-*/
-
-
 func main() {
 	rdd := RDD.NewKeyedRDD([]interface{}{1, 2, 3, 4, 5, 6}, func(i interface{}) (interface{}, error) {
 		return i, nil
