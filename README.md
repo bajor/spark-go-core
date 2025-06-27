@@ -14,7 +14,7 @@ The filter operation works as follows:
 - All other operations (map, reduce) skip `nil` elements
 - In the final evaluation, all `nil` elements are removed before returning the result
 
-This approach allows for efficient lazy evaluation where filter operations don't immediately remove elements but mark them for later removal.
+This approach allows for deferred filtering where non-matching elements are marked as `nil` and skipped by subsequent operations, with final cleanup happening during evaluation.
 
 **Code example:**
 ```go
