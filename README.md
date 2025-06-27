@@ -1,102 +1,47 @@
 The README will be structured as follows: I will outline all the features that have been implemented, along with code examples to illustrate their functionality.
 
 ## Lazy evaluation
-The implementation includes chaining of map, filter, and reduce operations. There is simple execution optimization:
 
-- First it filters out the data.
-- Then mapping operations are applied.
-- Finally, the data is reduced.
+The implementation supports chaining of map, filter, and reduce operations. Operations are only evaluated when you call `GetData()`.
 
-### Filter Behavior
-The filter operation works as follows:
-- If an element matches the filter condition, it is left as is
-- If an element doesn't match the filter condition, it is converted in-place to `nil`
-- All other operations (map, reduce) skip `nil` elements
-- In the final evaluation, all `nil` elements are removed before returning the result
-
-This approach allows for deferred filtering where non-matching elements are marked as `nil` and skipped by subsequent operations, with final cleanup happening during evaluation.
-
-**Code example:**
+**Example:**
 ```go
-package main
+rdd := NewKeyedRDD([]interface{}{1, 2, 3, 4, 5, 6}, func(i interface{}) (interface{}, error) { return i, nil })
 
-import (
-	"fmt"
+// Chain operations (no evaluation yet)
+rdd = rdd.Map(func(i interface{}) (interface{}, error) { return i.(int) * 2, nil })
+rdd = rdd.Filter(func(i interface{}) bool { return i.(int) > 4 })
 
-	lazy "github.com/bajor/spark-go-core/lazy_evaluation"
-)
-
-func main() {
-	chain := &lazy.LazyChain{}
-
-	chain.Add(lazy.MapOperation(func(i interface{}) (interface{}, error) {
-		return i.(int) * 2, nil
-	}))
-
-	chain.Add(lazy.FilterOperations(func(i interface{}) bool {
-		if val, ok := i.(int); ok {
-			return val > 4
-		}
-		return false
-	}))
-
-	chain.Add(lazy.ReduceOperation(func(a []interface{}) ([]interface{}, error) {
-		return []interface{}{len(a)}, nil
-	}))
-
-	input_slice := []interface{}{1, 2, 3, 4}
-
-	result, err := chain.Evaluate(input_slice)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println("Result:", result)
-}
+// Evaluation happens here
+result := rdd.GetData() // [6 8 10 12]
 ```
 
-## RDDs
+## RDD Chaining and Reduce
 
-The RDD (Resilient Distributed Dataset) implementation provides a high-level API for data processing with lazy evaluation.
-
-**Code example:**
 ```go
-package main
+rdd := NewKeyedRDD([]interface{}{1, 2, 3, 4, 5, 6}, func(i interface{}) (interface{}, error) { return i, nil })
 
-import (
-	"fmt"
+// Chain transformations
+rdd = rdd.Map(func(i interface{}) (interface{}, error) { return i.(int) * 2, nil })
+rdd = rdd.Filter(func(i interface{}) bool { return i.(int) > 4 })
 
-	RDD "github.com/bajor/spark-go-core/resiliant_distributed_dataset"
-)
+// Reduce by key (count elements)
+rdd = rdd.ReduceByKey(func(a []interface{}) ([]interface{}, error) { return []interface{}{len(a)}, nil })
 
-func main() {
-	// Create a new RDD with data [1, 2, 3, 4, 5, 6]
-	rdd := RDD.NewKeyedRDD([]interface{}{1, 2, 3, 4, 5, 6}, func(i interface{}) (interface{}, error) {
-		return i, nil
-	})
+result := rdd.GetData() // [1 1 1 1]
+```
 
-	// Map: multiply each element by 2
-	rdd = rdd.Map(func(i interface{}) (interface{}, error) {
-		return i.(int) * 2, nil
-	})
+## RDD Immutability
 
-	// Filter: keep only elements > 4
-	rdd = rdd.Filter(func(i interface{}) bool {
-		if val, ok := i.(int); ok {
-			return val > 4
-		}
-		return false
-	})
+```go
+original := NewKeyedRDD([]interface{}{1, 2, 3}, func(i interface{}) (interface{}, error) { return i, nil })
 
-	// Get the result: [10, 12] (only 10 and 12 are > 4)
-	fmt.Println("After filter:", rdd.GetData())
+mapped := original.Map(func(i interface{}) (interface{}, error) { return i.(int) * 2, nil })
+filtered := original.Filter(func(i interface{}) bool { return i.(int) > 1 })
 
-	// Reduce: count elements
-	rdd = rdd.ReduceByKey(func(a []interface{}) ([]interface{}, error) {
-		return []interface{}{len(a)}, nil
-	})
-
-	fmt.Println("Count:", rdd.GetData())
-}
+original.GetData() // [1 2 3]
+mapped.GetData()   // [2 4 6]
+filtered.GetData() // [2 3]
 ```
 
 TODO
