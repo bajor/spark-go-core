@@ -1,8 +1,7 @@
 all: test run
 
 test:
-	go test -count=1 ./operations/...
-	go test -count=1 ./rdd/...
+	go test -count=1 ./...
 
 run:
-	go run main.go 
+	go run main.go
