@@ -150,6 +150,9 @@ func (lc *LazyChain) HasOperations() bool {
 
 // Collect evaluates the lazy chain and returns all results
 func (lc *LazyChain) Collect() ([]interface{}, error) {
+	// Reset the underlying iterator so multiple calls work correctly
+	lc.iterator.Reset()
+
 	// Build the iterator chain
 	currentIterator := lc.iterator
 
@@ -187,6 +190,8 @@ func (lc *LazyChain) Collect() ([]interface{}, error) {
 
 // ForEach applies a function to each element without collecting results
 func (lc *LazyChain) ForEach(fn func(interface{}) error) error {
+	// Reset the underlying iterator so each call processes all elements
+	lc.iterator.Reset()
 	currentIterator := lc.iterator
 
 	// Apply filters first
