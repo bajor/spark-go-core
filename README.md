@@ -44,12 +44,30 @@ mapped.GetData()   // [2 4 6]
 filtered.GetData() // [2 3]
 ```
 
+## Simple Driver Node
+
+The `driver` package provides a minimal TCP server for registering workers and distributing messages.
+
+```go
+func main() {
+    d := driver.New("localhost:0")
+    if err := d.Start(); err != nil { /* handle error */ }
+    defer d.Stop()
+
+    // send a JSON message to all connected workers
+    d.Distribute(map[string]string{"msg": "hello"})
+}
+```
+
+To test it manually, run the program and then connect from another terminal with `nc <address>` (replace `<address>` with the printed driver address). Messages sent by the driver will appear in the netcat session.
+
+
 ## TODO
 
 ### Simple Distributed POC Implementation
 
 #### Phase 1: Basic Node Emulation
-- [ ] **Simple Driver Node**
+- [x] **Simple Driver Node**
   - TCP server listening for worker connections
   - Basic RDD operation distribution
   - Simple worker registration (in-memory list)
