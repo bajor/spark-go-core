@@ -41,7 +41,7 @@ filtered := original.Filter(func(i interface{}) bool { return i.(int) > 1 })
 
 original.GetData() // [1 2 3]
 mapped.GetData()   // [2 4 6]
-filtered.GetData() // [6]
+filtered.GetData() // [2 3]
 ```
 
 ## TODO
